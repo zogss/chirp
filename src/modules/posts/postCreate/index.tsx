@@ -1,22 +1,28 @@
 import { useUser } from "@clerk/nextjs";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import { SimpleSpinner } from "~/components/loading";
 import { api } from "~/utils/api";
+import toast from "react-hot-toast";
 
 export const PostCreate = () => {
   //* hooks
   const { user } = useUser();
   const ctx = api.useContext();
-
-  const onSuccess = useCallback(() => {
-    setContent("");
-    void ctx.posts.getAll.invalidate();
-  }, [ctx.posts.getAll]);
-
   const { mutate, isLoading: isPosting } = api.posts.create.useMutation({
-    onSuccess: onSuccess,
+    onSuccess: () => {
+      setContent("");
+      void ctx.posts.getAll.invalidate();
+    },
+    onError: ({ data }) => {
+      const errorMessage = data?.zodError?.fieldErrors?.content;
+      if (errorMessage && errorMessage[0]) {
+        toast.error(errorMessage[0]);
+      } else {
+        toast.error("Failed to create post! Please try again later.");
+      }
+    },
   });
 
   //* states
@@ -43,11 +49,19 @@ export const PostCreate = () => {
           className="grow bg-transparent outline-none"
           value={content}
           onChange={(e) => setContent(e.target.value)}
+          onKeyDown={(e) => {
+            e.preventDefault();
+            if (e.key === "Enter") {
+              mutate({
+                content,
+              });
+            }
+          }}
         />
         <motion.button
           type="button"
           title="Tweet"
-          disabled={!content}
+          disabled={!content || isPosting}
           onClick={() =>
             mutate({
               content,
