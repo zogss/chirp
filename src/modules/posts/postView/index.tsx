@@ -1,7 +1,8 @@
 import moment from "moment";
 import Image from "next/image";
+import Link from "next/link";
 import React from "react";
-import { RouterOutputs } from "~/utils/api";
+import type { RouterOutputs } from "~/utils/api";
 
 type PostWithUser = RouterOutputs["posts"]["getAll"][number];
 
@@ -23,11 +24,15 @@ export const PostView = ({ post, author }: PostWithUser) => {
             author.firstName || ""
           } ${author.lastName || ""}`}</span>
           <div className="text-slate-500">
-            <span>{`@${author.username}`}</span>
+            <Link href={`/@${author.username}`}>
+              <span>{`@${author.username}`}</span>
+            </Link>
             <span className="px-1">•</span>
-            <span>
-              {moment(post.createdAt).startOf("milliseconds").fromNow()}
-            </span>
+            <Link href={`/post/${post.id}`}>
+              <span>
+                {moment(post.createdAt).startOf("milliseconds").fromNow()}
+              </span>
+            </Link>
           </div>
         </div>
         <p className="">{post.content}</p>

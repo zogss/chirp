@@ -1,6 +1,6 @@
 import React from "react";
-import { LoadingSpinner } from "~/components/loading";
 import { api } from "~/utils/api";
+import { PostListSkeleton } from "../postSkeleton";
 
 import { PostView } from "../postView";
 
@@ -12,9 +12,7 @@ export const PostList = () => {
   return (
     <div className="flex grow flex-col">
       {isLoading ? (
-        <div className="my-auto self-center">
-          <LoadingSpinner />
-        </div>
+        <PostListSkeleton />
       ) : data ? (
         data.map(({ post, author }) => (
           <PostView key={post.id} {...{ post, author }} />
