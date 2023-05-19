@@ -6,6 +6,7 @@ import {
   privateProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
+import { ratelimiter } from "~/server/services/rateLimiter";
 
 const filterUserForClient = (user: User) => {
   return {
@@ -61,9 +62,19 @@ export const postsRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const authorId = ctx.userId;
+
+      const { success } = await ratelimiter.limit(authorId);
+
+      if (!success)
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: "You are doing that too much. Try again later.",
+        });
+
       const post = await ctx.prisma.post.create({
         data: {
-          authorId: ctx.userId,
+          authorId,
           content: input.content,
         },
       });
