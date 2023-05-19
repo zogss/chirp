@@ -15,10 +15,12 @@ export const PostList = () => {
         <div className="my-auto self-center">
           <LoadingSpinner />
         </div>
-      ) : (
-        data?.map(({ post, author }) => (
+      ) : data ? (
+        data.map(({ post, author }) => (
           <PostView key={post.id} {...{ post, author }} />
         ))
+      ) : (
+        <span className="my-auto self-center">No posts found</span>
       )}
     </div>
   );
