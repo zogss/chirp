@@ -1,18 +1,21 @@
 import "~/styles/globals.css";
 
 import { ClerkProvider } from "@clerk/nextjs";
-import { AppType } from "next/app";
-import { Layout } from "~/components/layout";
+import type { AppType } from "next/app";
 import { api } from "~/utils/api";
 import { Toaster } from "react-hot-toast";
+import Head from "next/head";
 
 const MyApp: AppType = ({ Component, pageProps }) => {
   return (
     <ClerkProvider {...pageProps}>
+      <Head>
+        <title>Chirp</title>
+        <meta name="description" content="💭" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
       <Toaster position="bottom-center" />
-      <Layout>
-        <Component {...pageProps} />
-      </Layout>
+      <Component {...pageProps} />
     </ClerkProvider>
   );
 };
