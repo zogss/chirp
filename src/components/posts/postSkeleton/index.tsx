@@ -19,9 +19,9 @@ export const PostSkeleton = () => (
   </div>
 );
 
-export const PostListSkeleton = () => (
+export const PostListSkeleton = ({ items = 10 }) => (
   <div className="flex flex-col">
-    {[...Array(10)].map((_, i) => (
+    {[...Array(items)].map((_, i) => (
       <PostSkeleton key={i} />
     ))}
   </div>

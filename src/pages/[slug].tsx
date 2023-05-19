@@ -7,6 +7,7 @@ import { appRouter } from "~/server/api/root";
 import superjson from "superjson";
 import { PageLayout } from "~/components/layout";
 import Image from "next/image";
+import { ProfileFeed } from "~/modules/profile";
 
 const ProfilePage: NextPage<{ username: string }> = ({ username }) => {
   //* hooks
@@ -20,7 +21,7 @@ const ProfilePage: NextPage<{ username: string }> = ({ username }) => {
   return (
     <>
       <Head>
-        <title>{data?.username}</title>
+        <title>{data.username}</title>
       </Head>
       <PageLayout>
         <div className="relative h-40 bg-slate-600">
@@ -37,6 +38,7 @@ const ProfilePage: NextPage<{ username: string }> = ({ username }) => {
           data.username || ""
         }`}</div>
         <div className="border-b border-slate-400" />
+        <ProfileFeed userId={data.id} />
       </PageLayout>
     </>
   );

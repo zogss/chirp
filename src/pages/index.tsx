@@ -1,10 +1,10 @@
 import { SignIn, useUser } from "@clerk/nextjs";
 import { LoadingPage } from "~/components/loading";
-import { PostList } from "~/modules/posts";
 import { PostCreate } from "~/modules/posts/postCreate";
 
 import type { NextPage } from "next";
 import { PageLayout } from "~/components/layout";
+import { PostList } from "~/modules/posts";
 
 const HomePage: NextPage = () => {
   //* hooks

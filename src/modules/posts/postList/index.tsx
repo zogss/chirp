@@ -1,8 +1,8 @@
 import React from "react";
 import { api } from "~/utils/api";
-import { PostListSkeleton } from "../postSkeleton";
+import { PostListSkeleton } from "~/components/posts/postSkeleton";
 
-import { PostView } from "../postView";
+import { PostView } from "~/components/posts/postView";
 
 export const PostList = () => {
   //* hooks
