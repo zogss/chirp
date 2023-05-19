@@ -25,7 +25,9 @@ export const PostView = ({ post, author }: PostWithUser) => {
           <div className="text-slate-500">
             <span>{`@${author.username}`}</span>
             <span className="px-1">•</span>
-            <span>{moment(post.createdAt).startOf("hour").fromNow()}</span>
+            <span>
+              {moment(post.createdAt).startOf("milliseconds").fromNow()}
+            </span>
           </div>
         </div>
         <p className="">{post.content}</p>
