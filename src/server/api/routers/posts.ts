@@ -9,6 +9,7 @@ import {
 } from "~/server/api/trpc";
 import { filterUserForClient } from "~/server/helpers/filterUserForClient";
 import { ratelimiter } from "~/server/services/rateLimiter";
+import emojiRegex from "emoji-regex";
 
 const addUserDataToPosts = async (posts: Post[]) => {
   const users = (
@@ -95,7 +96,12 @@ export const postsRouter = createTRPCRouter({
   create: privateProcedure
     .input(
       z.object({
-        content: z.string().emoji("Only emojis are allowed!").min(1).max(280),
+        content: z
+          .string()
+          .emoji("Only emojis are allowed!")
+          .regex(emojiRegex(), "Only emojis are allowed!")
+          .min(1)
+          .max(280),
       })
     )
     .mutation(async ({ ctx, input }) => {

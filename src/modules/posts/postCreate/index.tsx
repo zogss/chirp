@@ -50,7 +50,6 @@ export const PostCreate = () => {
           value={content}
           onChange={(e) => setContent(e.target.value)}
           onKeyDown={(e) => {
-            e.preventDefault();
             if (e.key === "Enter") {
               mutate({
                 content,
