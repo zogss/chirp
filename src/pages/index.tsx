@@ -14,7 +14,7 @@ const Home: NextPage = () => {
   return !isLoaded ? (
     <LoadingPage />
   ) : (
-    <div className="flex h-screen w-full flex-col border-x border-slate-400 md:max-w-2xl">
+    <div className="flex min-h-screen w-full flex-col border-x border-slate-400 md:max-w-2xl">
       <div className="flex w-full justify-start border-b border-slate-400 p-4">
         {isSignedIn && <PostCreate />}
       </div>
