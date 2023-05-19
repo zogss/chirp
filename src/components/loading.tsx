@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
 
 export const SimpleSpinner = () => (
@@ -27,8 +28,18 @@ export const LoadingSpinner = () => (
   <span className="loader relative block h-[1em] w-[1em] overflow-hidden rounded-[50%] indent-[-9999em] text-[45px] text-slate-300" />
 );
 
-export const LoadingPage = () => (
-  <div className="absolute inset-0 flex h-screen w-screen items-center justify-center">
-    <LoadingSpinner />
-  </div>
+export const LoadingPage = ({ isLoading = false }) => (
+  <AnimatePresence mode="wait">
+    {isLoading && (
+      <motion.div
+        initial={{ opacity: 1 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.5 }}
+        className="absolute inset-0 z-10 flex h-screen w-screen items-center justify-center bg-black"
+      >
+        <LoadingSpinner />
+      </motion.div>
+    )}
+  </AnimatePresence>
 );
