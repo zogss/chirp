@@ -8,6 +8,7 @@ import superjson from "superjson";
 import { PageLayout } from "~/components/layout";
 import Image from "next/image";
 import { ProfileFeed } from "~/modules/profile";
+import { generateSSGHelper } from "~/server/helpers/ssgHelper";
 
 const ProfilePage: NextPage<{ username: string }> = ({ username }) => {
   //* hooks
@@ -45,11 +46,7 @@ const ProfilePage: NextPage<{ username: string }> = ({ username }) => {
 };
 
 export const getStaticProps: GetStaticProps = async (context) => {
-  const ssg = createServerSideHelpers({
-    router: appRouter,
-    ctx: { prisma, userId: null },
-    transformer: superjson, // optional - adds superjson serialization
-  });
+  const ssg = generateSSGHelper();
 
   const slug = context.params?.slug as string;
 

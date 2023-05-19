@@ -4,7 +4,7 @@ import { api } from "~/utils/api";
 
 export const ProfileFeed = ({ userId }: { userId: string }) => {
   //* hooks
-  const { data, isLoading } = api.posts.getPostsByUserId.useQuery({
+  const { data, isLoading } = api.posts.getByUserId.useQuery({
     userId,
   });
 
