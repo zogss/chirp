@@ -3,7 +3,7 @@ import React from "react";
 
 export const PostSkeleton = () => (
   <div>
-    <div className="flex gap-3 border-b border-slate-400 p-4">
+    <div className="flex gap-3 border-b border-slate-700 p-4">
       <div className="h-12 w-12 animate-pulse rounded-full bg-gray-900" />
       <div className="flex w-full flex-col gap-2">
         <div className="flex gap-2">
