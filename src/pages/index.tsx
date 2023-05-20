@@ -1,4 +1,4 @@
-import { useUser } from "@clerk/nextjs";
+import { SignedIn, useUser } from "@clerk/nextjs";
 import { LoadingPage } from "~/components/loading";
 import { PostCreate } from "~/modules/posts/postCreate";
 
@@ -8,14 +8,16 @@ import { PostList } from "~/modules/posts";
 
 const HomePage: NextPage = () => {
   //* hooks
-  const { isSignedIn, isLoaded } = useUser();
+  const { isLoaded } = useUser();
 
   //* render
   return (
     <PageLayout>
       <LoadingPage isLoading={!isLoaded} />
       <div className="flex w-full justify-start border-b border-slate-700 p-4">
-        {isSignedIn && <PostCreate />}
+        <SignedIn>
+          <PostCreate />
+        </SignedIn>
       </div>
       <PostList />
     </PageLayout>

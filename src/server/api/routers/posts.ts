@@ -1,5 +1,3 @@
-import clerkClient from "@clerk/clerk-sdk-node";
-import type { Post } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import {
@@ -7,44 +5,15 @@ import {
   privateProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { filterUserForClient } from "~/server/helpers/filterUserForClient";
 import { ratelimiter } from "~/server/services/rateLimiter";
 import emojiRegex from "emoji-regex";
-
-const addUserDataToPosts = async (posts: Post[]) => {
-  const users = (
-    await clerkClient.users.getUserList({
-      userId: posts.map((post) => post.authorId),
-      limit: 100,
-    })
-  ).map(filterUserForClient);
-
-  return posts.map((post) => {
-    const author = users.find((user) => user.id === post.authorId);
-
-    if (!author || !author.username)
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Author for post not found",
-      });
-
-    return {
-      post,
-      author: {
-        ...author,
-        username: author.username,
-      },
-    };
-  });
-};
+import { addUserDataToPosts } from "~/server/helpers/addUserDataToPosts";
 
 export const postsRouter = createTRPCRouter({
   getAll: publicProcedure.query(async ({ ctx }) => {
     const posts = await ctx.prisma.post.findMany({
       take: 100,
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy: [{ createdAt: "desc" }],
     });
 
     return addUserDataToPosts(posts);
