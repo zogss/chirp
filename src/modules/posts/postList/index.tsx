@@ -3,6 +3,7 @@ import { api } from "~/utils/api";
 import { PostListSkeleton } from "~/components/posts/postSkeleton";
 
 import { PostView } from "~/components/posts/postView";
+import { motion } from "framer-motion";
 
 export const PostList = () => {
   //* hooks
@@ -10,7 +11,7 @@ export const PostList = () => {
 
   //* render
   return (
-    <div className="flex grow flex-col">
+    <motion.div layout="size" className="flex grow flex-col">
       {isLoading ? (
         <PostListSkeleton />
       ) : data && data.length > 0 ? (
@@ -20,6 +21,6 @@ export const PostList = () => {
       ) : (
         <span className="my-auto self-center">No posts found</span>
       )}
-    </div>
+    </motion.div>
   );
 };
