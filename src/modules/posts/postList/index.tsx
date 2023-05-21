@@ -13,7 +13,7 @@ export const PostList = () => {
     <div className="flex grow flex-col">
       {isLoading ? (
         <PostListSkeleton />
-      ) : data ? (
+      ) : data && data.length > 0 ? (
         data.map(({ post, author }) => (
           <PostView key={post.id} {...{ post, author }} />
         ))
