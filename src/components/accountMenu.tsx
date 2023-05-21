@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-misused-promises */
 import { useUser, useClerk } from "@clerk/nextjs";
 import { Menu, Transition } from "@headlessui/react";
 import Image from "next/image";
@@ -69,7 +68,7 @@ export const AccountMenu = () => {
             <button
               type="button"
               title="Sign out"
-              onClick={() => signOut()}
+              onClick={() => void signOut()}
               className="flex w-full items-center px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-slate-200 hover:bg-opacity-10"
             >
               Log out @{user.username}
