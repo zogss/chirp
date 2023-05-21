@@ -25,9 +25,9 @@ export const AccountMenu = () => {
   if (!isSignedIn) return null;
 
   return (
-    <Menu as="div" className="relative inline-block text-left">
-      <div>
-        <Menu.Button className="flex w-full items-center justify-start gap-3 rounded-full p-3 pr-4 text-sm font-medium text-white transition-all hover:bg-slate-200 hover:bg-opacity-10">
+    <Menu as="div" className="relative flex w-full shrink-0 text-left">
+      <div className="flex shrink-0 justify-end">
+        <Menu.Button className="flex w-fit items-center justify-start gap-3 rounded-full p-2 text-sm font-medium text-white transition-all hover:bg-slate-200 hover:bg-opacity-10 md:p-3 md:pr-4 lg:w-full">
           {isLoaded ? (
             <>
               <Image
@@ -35,9 +35,9 @@ export const AccountMenu = () => {
                 alt={`${user.username || ""}'s profile image`}
                 width={40}
                 height={40}
-                className="rounded-full"
+                className="shrink-0 rounded-full"
               />
-              <div className="flex flex-col items-start justify-start">
+              <div className="hidden flex-col items-start justify-start md:flex">
                 <h6 className="text-base font-semibold text-white">
                   {user.firstName}
                 </h6>
@@ -45,7 +45,7 @@ export const AccountMenu = () => {
                   user.username || ""
                 }`}</span>
               </div>
-              <BsThreeDots className="ml-14" />
+              <BsThreeDots className="hidden md:ml-2 lg:ml-8 lg:block xl:ml-14" />
             </>
           ) : (
             <AccountButtonSkeleton />
@@ -63,7 +63,7 @@ export const AccountMenu = () => {
       >
         <Menu.Items
           as="div"
-          className="absolute bottom-16 left-0 mb-2 w-56 origin-bottom-right rounded-xl bg-black py-4 shadow-outline-white"
+          className="absolute bottom-16 left-0 z-10 mb-2 w-56 origin-bottom-right rounded-xl bg-black py-4 shadow-outline-white"
         >
           <Menu.Item>
             <button
