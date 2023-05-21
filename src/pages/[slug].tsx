@@ -1,14 +1,12 @@
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import { api } from "~/utils/api";
-import { createServerSideHelpers } from "@trpc/react-query/server";
-import { prisma } from "~/server/db";
-import { appRouter } from "~/server/api/root";
-import superjson from "superjson";
 import { PageLayout } from "~/components/layout";
-import Image from "next/image";
 import { ProfileFeed } from "~/modules/profile";
 import { generateSSGHelper } from "~/server/helpers/ssgHelper";
+import { ProfileImageBlock } from "~/modules/profile/profileImageBlock";
+import { ProfileData } from "~/modules/profile/profileData";
+import { capitalCase } from "change-case";
 
 const ProfilePage: NextPage<{ username: string }> = ({ username }) => {
   //* hooks
@@ -22,23 +20,14 @@ const ProfilePage: NextPage<{ username: string }> = ({ username }) => {
   return (
     <>
       <Head>
-        <title>{data.username}</title>
+        <title>
+          {`${capitalCase(data.firstName || "")} (@${data.username || ""})`} -
+          Chirp
+        </title>
       </Head>
       <PageLayout>
-        <div className="relative h-40 bg-slate-600">
-          <Image
-            src={data.profileImageUrl}
-            alt={`${data.username || ""} - profile image`}
-            width={128}
-            height={128}
-            className="absolute bottom-0 left-0 -mb-16 ml-4 rounded-full border-4 border-black"
-          />
-        </div>
-        <div className="h-16" />
-        <div className="p-4 text-2xl font-bold">{`@${
-          data.username || ""
-        }`}</div>
-        <div className="border-b border-slate-700" />
+        <ProfileImageBlock {...data} />
+        <ProfileData {...data} />
         <ProfileFeed userId={data.id} />
       </PageLayout>
     </>
