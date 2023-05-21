@@ -13,7 +13,7 @@ export const PageLayout = ({ children }: PropsWithChildren) => {
   return (
     <main className="flex min-h-screen justify-center">
       <div
-        className="flex min-h-screen grow flex-col items-end"
+        className="sticky top-0 flex h-screen grow flex-col items-end"
         style={{
           width: leftWidth,
         }}
@@ -29,7 +29,7 @@ export const PageLayout = ({ children }: PropsWithChildren) => {
         {children}
       </div>
       <div
-        className="hidden min-h-screen grow flex-col items-start sm:flex"
+        className="sticky top-0 hidden h-screen grow flex-col items-start sm:flex"
         style={{
           width: rightWidth,
         }}
