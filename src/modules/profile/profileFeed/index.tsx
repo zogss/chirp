@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import React from "react";
 import { PostListSkeleton, PostView } from "~/components/posts";
 import { api } from "~/utils/api";
@@ -14,10 +15,10 @@ export const ProfileFeed = ({ userId }: { userId: string }) => {
   if (!data || data.length === 0) return <div>User has no posts!</div>;
 
   return (
-    <div className="flex flex-col">
+    <motion.div layout="size" className="flex flex-col">
       {data.map(({ post, author }) => (
         <PostView key={post.id} {...{ post, author }} />
       ))}
-    </div>
+    </motion.div>
   );
 };
