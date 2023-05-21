@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import { SimpleSpinner } from "~/components/loading";
 import { api } from "~/utils/api";
 import toast from "react-hot-toast";
+import EmojiButton from "~/components/emojiButton";
 
 export const PostCreate = () => {
   //* hooks
@@ -43,10 +44,9 @@ export const PostCreate = () => {
         blurDataURL="https://img.freepik.com/free-vector/white-blurred-background_1034-249.jpg"
       />
       <div className="flex w-full flex-col gap-2">
-        <input
-          type="text"
+        <textarea
           placeholder="Type some emojis!"
-          className="grow bg-transparent outline-none"
+          className="min-h-[60px] grow resize-none bg-transparent p-2 outline-none"
           value={content}
           onChange={(e) => setContent(e.target.value)}
           onKeyDown={(e) => {
@@ -57,32 +57,35 @@ export const PostCreate = () => {
             }
           }}
         />
-        <motion.button
-          type="button"
-          title="Tweet"
-          disabled={!content || isPosting}
-          onClick={() =>
-            mutate({
-              content,
-            })
-          }
-          className="flex w-fit items-center justify-center gap-2 self-end rounded-full bg-blue-600 px-4 py-2 font-bold text-slate-100 transition-all disabled:grayscale-[30%]"
-        >
-          Tweet
-          <AnimatePresence mode="wait">
-            {isPosting && (
-              <motion.span
-                key="spinner"
-                animate={{ opacity: 1 }}
-                initial={{ opacity: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <SimpleSpinner />
-              </motion.span>
-            )}
-          </AnimatePresence>
-        </motion.button>
+        <div className="flex w-full items-center justify-between">
+          <EmojiButton value={content} onChange={setContent} />
+          <button
+            type="button"
+            title="Tweet"
+            disabled={!content || isPosting}
+            onClick={() =>
+              mutate({
+                content,
+              })
+            }
+            className="flex w-fit items-center justify-center gap-2 self-end rounded-full bg-blue-600 px-4 py-2 font-bold text-slate-100 transition-all disabled:grayscale-[30%]"
+          >
+            Tweet
+            <AnimatePresence mode="wait">
+              {isPosting && (
+                <motion.span
+                  key="spinner"
+                  animate={{ opacity: 1 }}
+                  initial={{ opacity: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <SimpleSpinner />
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </button>
+        </div>
       </div>
     </div>
   );
