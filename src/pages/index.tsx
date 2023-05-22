@@ -14,11 +14,11 @@ const HomePage: NextPage = () => {
   return (
     <PageLayout>
       <LoadingPage isLoading={!isLoaded} />
-      <div className="flex w-full justify-start border-b border-slate-700 p-4">
-        <SignedIn>
+      <SignedIn>
+        <div className="flex w-full justify-start border-b border-slate-700 p-4">
           <PostCreate />
-        </SignedIn>
-      </div>
+        </div>
+      </SignedIn>
       <PostList />
     </PageLayout>
   );

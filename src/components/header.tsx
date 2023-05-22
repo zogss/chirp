@@ -16,7 +16,7 @@ const HeaderItems = () => {
   if (!isSignedIn) return null;
 
   return (
-    <div className="flex flex-col items-start justify-end gap-2 md:justify-start">
+    <div className="flex w-full items-center justify-evenly gap-2 sm:w-auto sm:flex-col sm:items-start sm:justify-end md:justify-start">
       <Link
         href="/"
         aria-label="Go to home page"
@@ -64,7 +64,7 @@ const HeaderItems = () => {
 };
 
 export const MainHeader = () => (
-  <div className="flex w-fit flex-grow flex-col items-start justify-between pb-4 pl-4 pr-4 pt-8 md:pl-0">
+  <div className="flex w-full items-start justify-between px-4 py-2 shadow-outline-white sm:w-fit sm:grow sm:flex-col sm:pb-4 sm:pl-4 sm:pr-4 sm:pt-8 sm:shadow-none md:pl-0">
     <HeaderItems />
     <AccountMenu />
   </div>

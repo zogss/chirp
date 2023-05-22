@@ -32,12 +32,12 @@ export const PostView = ({ post, author }: PostWithUser) => {
       <Image
         src={author?.profileImageUrl}
         alt={`${author.username || "user"} - profile image`}
-        className="rounded-full"
         width={48}
         height={48}
+        className="h-12 w-12 shrink-0 rounded-full"
       />
       <div
-        className={clsx("flex flex-col transition-all", {
+        className={clsx("flex flex-col gap-2 transition-all", {
           "scale-95": isPresent,
           "scale-100": !isPresent,
         })}
@@ -46,26 +46,27 @@ export const PostView = ({ post, author }: PostWithUser) => {
           <Link
             href={`/${author.username}`}
             onClick={(e) => e.stopPropagation()}
+            className=""
           >
-            <span className="font-bold text-white transition-all hover:underline">{`${
+            <span className="block max-w-[30vw] truncate font-bold text-white transition-all hover:underline sm:max-w-[35vw] lg:max-w-full">{`${
               author.firstName || ""
             } ${author.lastName || ""}`}</span>
           </Link>
-          <div className="text-slate-500">
+          <div className="flex items-center text-slate-500">
             <Link
               href={`/${author.username}`}
               onClick={(e) => e.stopPropagation()}
             >
-              <span>{`@${author.username}`}</span>
+              <span className="block max-w-[25vw] truncate sm:max-w-[18vw] lg:max-w-full">{`@${author.username}`}</span>
             </Link>
             <span className="px-1">•</span>
             <Link
               href={`/post/${post.id}`}
               onClick={(e) => e.stopPropagation()}
-              className="transition-all hover:underline"
+              className="shrink-0 transition-all hover:underline"
             >
-              <span>
-                {moment(post.createdAt).startOf("milliseconds").fromNow()}
+              <span className="truncate">
+                {moment(post.createdAt).startOf("milliseconds").fromNow(true)}
               </span>
             </Link>
           </div>

@@ -24,7 +24,10 @@ export const AccountMenu = () => {
   if (!isSignedIn) return null;
 
   return (
-    <Menu as="div" className="relative flex w-full shrink-0 text-left">
+    <Menu
+      as="div"
+      className="relative hidden w-full shrink-0 text-left sm:flex"
+    >
       <div className="flex shrink-0 justify-end">
         <Menu.Button className="flex w-fit items-center justify-start gap-3 rounded-full p-2 text-sm font-medium text-white transition-all hover:bg-slate-200 hover:bg-opacity-10 md:p-3 md:pr-4 lg:w-full">
           {isLoaded ? (

@@ -29,7 +29,7 @@ export const useLayout = (): useLayoutReturnType => {
   const getColumnsWidth = useCallback(() => {
     if (windowSize?.width && windowSize.width < breakpoints.sm) {
       return {
-        leftWidth: "fit-content",
+        leftWidth: "100%",
         mainWidth: "100%",
         rightWidth: 0,
       };
