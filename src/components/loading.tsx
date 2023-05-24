@@ -1,12 +1,14 @@
 import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
 
-export const SimpleSpinner = () => (
+export const SimpleSpinner = ({ size = 20 }) => (
   <svg
-    className="h-5 w-5 animate-spin"
+    className="animate-spin"
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
     viewBox="0 0 24 24"
+    width={size}
+    height={size}
   >
     <circle
       className="opacity-25"

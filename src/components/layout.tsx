@@ -6,7 +6,7 @@ import { BsArrowLeftShort } from "react-icons/bs";
 import { useLayout } from "~/hooks/useLayout";
 import { MainHeader } from "./header";
 import { SideBar } from "./sideBar";
-import Link from "next/link";
+import { clsx } from "clsx";
 
 export const PageLayout = ({ children }: PropsWithChildren) => {
   //* hooks
@@ -41,13 +41,29 @@ export const PageLayout = ({ children }: PropsWithChildren) => {
   return (
     <main className="flex min-h-screen flex-col-reverse justify-center sm:flex-row">
       <div
-        className="sticky bottom-0 z-10 flex flex-col items-end bg-black sm:bottom-auto sm:top-0 sm:h-screen sm:grow sm:bg-transparent"
+        className={clsx(
+          "sticky bottom-0 z-10 flex-col items-end bg-black sm:bottom-auto sm:top-0 sm:h-screen sm:grow sm:bg-transparent",
+          !isSignedIn ? "hidden sm:flex" : "flex"
+        )}
         style={{
           width: leftWidth,
         }}
       >
         <MainHeader />
       </div>
+      {!isSignedIn && (
+        <div className="fixed bottom-0 z-20 flex w-full items-center justify-center bg-black px-3 py-5 shadow-outline-white lg:hidden">
+          <SignInButton mode="modal">
+            <button
+              type="button"
+              title="Click to sign in or sign up"
+              className="flex w-fit justify-center rounded-full bg-black px-6 py-1.5 text-sm font-semibold text-white shadow-outline-white transition-all hover:bg-white hover:bg-opacity-10 md:w-1/3"
+            >
+              Sign in or sign up
+            </button>
+          </SignInButton>
+        </div>
+      )}
       <div
         className="flex grow flex-col border-x border-slate-700 md:max-w-2xl"
         style={{
@@ -58,7 +74,7 @@ export const PageLayout = ({ children }: PropsWithChildren) => {
           {router.pathname !== "/" && (
             <button
               type="button"
-              title=""
+              title="Back button"
               onClick={handleBack}
               className="text-gray-300"
             >
@@ -77,19 +93,6 @@ export const PageLayout = ({ children }: PropsWithChildren) => {
       >
         <SideBar />
       </div>
-      {!isSignedIn && (
-        <div className="fixed bottom-0 z-20 flex w-full items-center justify-center bg-black px-3 py-5 shadow-outline-white lg:hidden">
-          <SignInButton mode="modal">
-            <button
-              type="button"
-              title="Click to sign in"
-              className="flex w-1/2 justify-center rounded-full bg-black px-4 py-1.5 text-sm font-semibold text-white shadow-outline-white transition-all hover:bg-white hover:bg-opacity-10 md:w-1/3"
-            >
-              Sign in
-            </button>
-          </SignInButton>
-        </div>
-      )}
     </main>
   );
 };

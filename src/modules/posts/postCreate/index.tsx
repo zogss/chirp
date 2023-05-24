@@ -1,11 +1,12 @@
 import { useUser } from "@clerk/nextjs";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { SimpleSpinner } from "~/components/loading";
 import { api } from "~/utils/api";
 import toast from "react-hot-toast";
 import EmojiButton from "~/components/emojiButton";
+import { clsx } from "clsx";
 
 export const PostCreate = () => {
   //* hooks
@@ -14,7 +15,7 @@ export const PostCreate = () => {
   const { mutate, isLoading: isPosting } = api.posts.create.useMutation({
     onSuccess: () => {
       setContent("");
-      void ctx.posts.getAll.invalidate();
+      void ctx.posts.infiniteScroll.invalidate();
     },
     onError: ({ data }) => {
       const errorMessage = data?.zodError?.fieldErrors?.content;
@@ -28,6 +29,18 @@ export const PostCreate = () => {
 
   //* states
   const [content, setContent] = useState("");
+
+  //* memos
+  const isEmojiButtonHidden = useMemo(() => {
+    const userAgent = navigator.userAgent;
+
+    if (userAgent.match(/Mobile/i)) {
+      return true; // Mobile
+    } else if (userAgent.match(/Tablet/i)) {
+      return true; // Tablet
+    }
+    return false; // Desktop
+  }, []);
 
   //* render
   if (!user) return null;
@@ -57,8 +70,15 @@ export const PostCreate = () => {
             }
           }}
         />
-        <div className="flex w-full items-center justify-between">
-          <EmojiButton value={content} onChange={setContent} />
+        <div
+          className={clsx(
+            "flex w-full items-center",
+            isEmojiButtonHidden ? "justify-end" : "justify-between"
+          )}
+        >
+          {!isEmojiButtonHidden && (
+            <EmojiButton value={content} onChange={setContent} />
+          )}
           <button
             type="button"
             title="Tweet"
@@ -68,7 +88,7 @@ export const PostCreate = () => {
                 content,
               })
             }
-            className="flex w-fit items-center justify-center gap-2 self-end rounded-full bg-blue-600 px-4 py-2 font-bold text-slate-100 transition-all disabled:grayscale-[30%]"
+            className="flex w-fit items-center justify-center gap-2 rounded-full bg-blue-600 px-4 py-2 font-bold text-slate-100 transition-all disabled:grayscale-[30%]"
           >
             Tweet
             <AnimatePresence mode="wait">
