@@ -56,9 +56,9 @@ const ProfileManagementButton = () => {
                 className="rounded-full"
               />
               <div className="flex flex-col">
-                <h1 className="text-sm font-semibold text-white">{`${
-                  user.fullName || ""
-                } ${user.lastName || ""}`}</h1>
+                <h1 className="text-sm font-semibold text-white">
+                  {user.fullName}
+                </h1>
                 <h2 className="text-xs font-semibold text-gray-500">{`@${
                   user.username || ""
                 }`}</h2>
