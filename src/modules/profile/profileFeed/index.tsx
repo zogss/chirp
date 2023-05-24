@@ -1,24 +1,53 @@
-import { motion } from "framer-motion";
-import React from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import React, { useEffect } from "react";
+import { useInView } from "react-intersection-observer";
 import { PostListSkeleton, PostView } from "~/components/posts";
 import { api } from "~/utils/api";
 
 export const ProfileFeed = ({ userId }: { userId: string }) => {
   //* hooks
-  const { data, isLoading } = api.posts.getByUserId.useQuery({
-    userId,
-  });
+  const { ref, inView } = useInView();
+  const { data, fetchNextPage, hasNextPage, isLoading, isFetchingNextPage } =
+    api.posts.infiniteScrollByUserId.useInfiniteQuery(
+      { limit: 25, userId },
+      { getNextPageParam: (lastPage) => lastPage.nextCursor }
+    );
+
+  //* effects
+  useEffect(() => {
+    if (inView) {
+      void fetchNextPage();
+    }
+  }, [inView, fetchNextPage]);
 
   //* render
-  if (isLoading) return <PostListSkeleton items={3} />;
+  if (isLoading) return <PostListSkeleton />;
 
-  if (!data || data.length === 0) return <div>User has no posts!</div>;
+  if (!data || data.pages.length === 0) return <div>User has no posts!</div>;
 
   return (
-    <motion.div layout="size" className="flex flex-col">
-      {data.map(({ post, author }) => (
-        <PostView key={post.id} {...{ post, author }} />
-      ))}
-    </motion.div>
+    <div className="flex grow flex-col">
+      <AnimatePresence initial={false}>
+        {data.pages.map((page) =>
+          page.posts.map(({ post, author }) => (
+            <PostView key={post.id} {...{ post, author }} />
+          ))
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {!!isFetchingNextPage && !!hasNextPage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
+            className="flex w-full items-center justify-center"
+          >
+            <PostListSkeleton items={3} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <div ref={ref}> </div>
+    </div>
   );
 };

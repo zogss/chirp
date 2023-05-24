@@ -20,7 +20,7 @@ export const PostSkeleton = () => (
 );
 
 export const PostListSkeleton = ({ items = 10 }) => (
-  <div className="flex flex-col">
+  <div className="flex w-full flex-col">
     {[...Array(items)].map((_, i) => (
       <PostSkeleton key={i} />
     ))}
