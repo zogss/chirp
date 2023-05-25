@@ -1,11 +1,13 @@
-import Link from "next/link";
-import React from "react";
-import { AccountMenu } from "./accountMenu";
-import { AiFillHome, AiOutlineHome } from "react-icons/ai";
-import { BsFillPersonFill, BsPerson } from "react-icons/bs";
 import { useUser } from "@clerk/nextjs";
-import { useRouter } from "next/router";
+import { capitalCase } from "change-case";
 import clsx from "clsx";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import React, { useCallback, useMemo } from "react";
+import { AiFillHome, AiOutlineHome } from "react-icons/ai";
+import { BsArrowLeftShort, BsFillPersonFill, BsPerson } from "react-icons/bs";
+
+import { AccountMenu } from "./accountMenu";
 
 const HeaderItems = () => {
   //* hooks
@@ -69,3 +71,46 @@ export const MainHeader = () => (
     <AccountMenu />
   </div>
 );
+
+export const NavigationHeader = () => {
+  //* hooks
+  const router = useRouter();
+
+  //* memos
+  const renderTitle = useMemo(() => {
+    switch (router.pathname) {
+      case "/":
+        return "Home";
+      case "/[slug]":
+        return router.query.slug as string;
+      case "/post/[id]":
+        return "Post";
+      default:
+        return "Unknown";
+    }
+  }, [router.pathname, router.query.slug]);
+
+  //* handlers
+  const handleBack = useCallback(() => {
+    if (router.pathname !== "/") {
+      router.back();
+    }
+  }, [router]);
+
+  //* render
+  return (
+    <div className="flex w-full gap-4 p-4">
+      {router.pathname !== "/" && (
+        <button
+          type="button"
+          title="Back button"
+          onClick={handleBack}
+          className="text-gray-300"
+        >
+          <BsArrowLeftShort size={28} />
+        </button>
+      )}
+      <h2 className="text-xl font-bold">{capitalCase(renderTitle)}</h2>
+    </div>
+  );
+};
