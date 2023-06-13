@@ -13,14 +13,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Yarn Install
+        run: npm install -g yarn
+
       - name: Install Dependencies
-        run: npm install
+        run: yarn install
 
       - name: Typecheck
-        run: npm run typecheck
+        run: yarn typecheck
 
       - name: Lint
-        run: npm run lint
+        run: yarn lint
 
       - name: Print Environment Variable
         run: echo $MY_ENV_VAR
