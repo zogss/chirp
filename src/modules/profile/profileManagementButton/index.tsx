@@ -1,8 +1,9 @@
 import { useClerk, useUser } from "@clerk/nextjs";
 import { Menu, Transition } from "@headlessui/react";
-import React, { Fragment, useState } from "react";
-import { useRouter } from "next/router";
 import Image from "next/image";
+import { useRouter } from "next/router";
+import React, { Fragment, useState } from "react";
+
 import ProfileManagementModal from "../profileManagementModal";
 
 const ProfileManagementButton = () => {

@@ -7,28 +7,37 @@ import { generateSSGHelper } from "~/server/helpers/ssgHelper";
 import { ProfileImageBlock } from "~/modules/profile/profileImageBlock";
 import { ProfileData } from "~/modules/profile/profileData";
 import { capitalCase } from "change-case";
+import ProfileFeedEmpty from "~/modules/profile/profileFeed/profileFeedEmpty";
+import { PostListSkeleton } from "~/components/posts";
 
 const ProfilePage: NextPage<{ username: string }> = ({ username }) => {
   //* hooks
-  const { data } = api.profile.getUserByUsername.useQuery({
+  const { data, error, isFetching } = api.profile.getUserByUsername.useQuery({
     username,
   });
 
   //* render
-  if (!data) return <div>Something went wrong!!</div>;
-
   return (
     <>
       <Head>
         <title>
-          {`${capitalCase(data.firstName || "")} (@${data.username || ""})`} -
-          Chirp
+          {`${
+            data ? capitalCase(data.firstName || "") : "..."
+          } (@${username}) - Chirp`}
         </title>
       </Head>
       <PageLayout>
-        <ProfileImageBlock {...data} />
-        <ProfileData {...data} />
-        <ProfileFeed userId={data.id} />
+        <ProfileImageBlock {...{ ...data, username: username }} />
+        <ProfileData {...{ ...data, username: username }} />
+        {error?.data?.httpStatus === 404 ? (
+          <ProfileFeedEmpty status="not-found" />
+        ) : data?.id ? (
+          <ProfileFeed userId={data.id} />
+        ) : isFetching ? (
+          <PostListSkeleton items={5} />
+        ) : (
+          <ProfileFeedEmpty status="error" />
+        )}
       </PageLayout>
     </>
   );
@@ -57,7 +66,6 @@ export const getStaticProps: GetStaticProps = async (context) => {
 export const getStaticPaths: GetStaticPaths = () => {
   return {
     paths: [],
-    // https://nextjs.org/docs/pages/api-reference/functions/get-static-paths#fallback-blocking
     fallback: "blocking",
   };
 };

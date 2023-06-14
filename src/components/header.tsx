@@ -110,7 +110,7 @@ export const NavigationHeader = () => {
           <BsArrowLeftShort size={28} />
         </button>
       )}
-      <h2 className="text-xl font-bold">{capitalCase(renderTitle)}</h2>
+      <h2 className="text-xl font-bold">{renderTitle}</h2>
     </div>
   );
 };

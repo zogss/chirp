@@ -4,7 +4,11 @@ import { useInView } from "react-intersection-observer";
 import { PostListSkeleton, PostView } from "~/components/posts";
 import { api } from "~/utils/api";
 
-export const ProfileFeed = ({ userId }: { userId: string }) => {
+interface ProfileFeedProps {
+  userId: string;
+}
+
+export const ProfileFeed = ({ userId }: ProfileFeedProps) => {
   //* hooks
   const { ref, inView } = useInView();
   const { data, fetchNextPage, hasNextPage, isLoading, isFetchingNextPage } =

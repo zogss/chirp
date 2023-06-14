@@ -10,10 +10,10 @@ export const ProfileImageBlock = ({
     <div className="relative h-40 bg-slate-600">
       <Image
         src={profileImageUrl || ""}
-        alt={`${username || ""} - profile image`}
+        alt={`(@${username || "Not found"}) - profile image`}
         width={128}
         height={128}
-        className="absolute bottom-0 left-0 -mb-16 ml-4 h-32 w-32 rounded-full border-4 border-black"
+        className="absolute bottom-0 left-0 -mb-16 ml-4 h-32 w-32 rounded-full border-4 border-black bg-slate-700 text-center"
       />
     </div>
     <div className="h-16" />
