@@ -1,0 +1,11 @@
+.git
+.next
+.yarn/cache
+.yarn/install-state.gz
+**/node_modules
+src/generated
+*.tsbuildinfo
+
+# secrets are passed at runtime (see docker-compose.yml), never baked into images
+.env
+.env*.local
