@@ -1,53 +1,45 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-body {
-  @apply bg-black text-slate-100;
+@theme {
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
+
+  /* Twitter/X "Lights out" palette */
+  --color-brand: #1d9bf0;
+  --color-brand-hover: #1a8cd8;
+  --color-danger: #f4212e;
+  --color-warning: #ffd400;
+  --color-foreground: #e7e9ea;
+  --color-muted: #71767b;
+  --color-line: #2f3336;
+  --color-line-strong: #536471;
+  --color-surface: #16181c;
+  --color-banner: #333639;
+  --color-backdrop: rgb(91 112 131 / 0.4);
+
+  /* Popovers and menus glow on the black background instead of casting a shadow */
+  --shadow-popover:
+    rgba(255, 255, 255, 0.2) 0 0 15px, rgba(255, 255, 255, 0.15) 0 0 3px 1px;
 }
 
-.loader {
-  transform: translateZ(0);
-  animation: mltShdSpin 1.7s infinite ease, round 1.7s infinite ease;
-}
+@layer base {
+  html {
+    color-scheme: dark;
+  }
 
-@keyframes mltShdSpin {
-  0% {
-    box-shadow: 0 -0.83em 0 -0.4em, 0 -0.83em 0 -0.42em, 0 -0.83em 0 -0.44em,
-      0 -0.83em 0 -0.46em, 0 -0.83em 0 -0.477em;
+  body {
+    @apply bg-black text-[15px] text-foreground antialiased;
+    -webkit-tap-highlight-color: transparent;
   }
-  5%,
-  95% {
-    box-shadow: 0 -0.83em 0 -0.4em, 0 -0.83em 0 -0.42em, 0 -0.83em 0 -0.44em,
-      0 -0.83em 0 -0.46em, 0 -0.83em 0 -0.477em;
-  }
-  10%,
-  59% {
-    box-shadow: 0 -0.83em 0 -0.4em, -0.087em -0.825em 0 -0.42em,
-      -0.173em -0.812em 0 -0.44em, -0.256em -0.789em 0 -0.46em,
-      -0.297em -0.775em 0 -0.477em;
-  }
-  20% {
-    box-shadow: 0 -0.83em 0 -0.4em, -0.338em -0.758em 0 -0.42em,
-      -0.555em -0.617em 0 -0.44em, -0.671em -0.488em 0 -0.46em,
-      -0.749em -0.34em 0 -0.477em;
-  }
-  38% {
-    box-shadow: 0 -0.83em 0 -0.4em, -0.377em -0.74em 0 -0.42em,
-      -0.645em -0.522em 0 -0.44em, -0.775em -0.297em 0 -0.46em,
-      -0.82em -0.09em 0 -0.477em;
-  }
-  100% {
-    box-shadow: 0 -0.83em 0 -0.4em, 0 -0.83em 0 -0.42em, 0 -0.83em 0 -0.44em,
-      0 -0.83em 0 -0.46em, 0 -0.83em 0 -0.477em;
-  }
-}
 
-@keyframes round {
-  0% {
-    transform: rotate(0deg);
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand;
   }
-  100% {
-    transform: rotate(360deg);
+
+  /* Tailwind v4 no longer gives buttons a pointer cursor */
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
   }
 }
