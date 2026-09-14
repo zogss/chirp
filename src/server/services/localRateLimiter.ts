@@ -33,7 +33,7 @@ const CONNECTION_ERROR = `Couldn't connect to the local Redis at ${env.LOCAL_RED
 
 const connect = async () => {
   const client: RedisClientType = createClient({
-    url: env.LOCAL_REDIS_URL as string,
+    url: env.LOCAL_REDIS_URL,
     socket: {
       connectTimeout: 2000,
       // give up after a few quick retries, so requests fail with a clear error instead of hanging
