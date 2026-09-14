@@ -1,57 +1,55 @@
-import React, { useEffect } from "react";
-import { api } from "~/utils/api";
-import { PostListSkeleton } from "~/components/posts/postSkeleton";
+"use client";
 
-import { PostView } from "~/components/posts/postView";
-import { AnimatePresence, motion } from "framer-motion";
+import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
+import { AnimatePresence } from "motion/react";
+import { useEffect, type ReactNode } from "react";
 import { useInView } from "react-intersection-observer";
 
-export const PostList = () => {
+import { LoadingSpinner } from "~/components/loading";
+import { PostView } from "~/components/posts";
+import { useTRPC } from "~/trpc/react";
+import { feedInput, feedQueryOptions } from "../constants";
+
+interface PostListProps {
+  /** Only show posts from this author (profile feed). */
+  authorId?: string;
+  emptyState: ReactNode;
+}
+
+export const PostList = ({ authorId, emptyState }: PostListProps) => {
   //* hooks
-  const { ref, inView } = useInView();
-  const { data, fetchNextPage, hasNextPage, isLoading, isFetchingNextPage } =
-    api.posts.infiniteScroll.useInfiniteQuery(
-      { limit: 25 },
-      { getNextPageParam: (lastPage) => lastPage.nextCursor }
+  const trpc = useTRPC();
+  const { ref, inView } = useInView({ rootMargin: "600px" });
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useSuspenseInfiniteQuery(
+      trpc.posts.infinite.infiniteQueryOptions(
+        feedInput(authorId),
+        feedQueryOptions,
+      ),
     );
 
   //* effects
   useEffect(() => {
-    if (inView) {
+    if (inView && hasNextPage && !isFetchingNextPage) {
       void fetchNextPage();
     }
-  }, [inView, fetchNextPage]);
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   //* render
+  const posts = data.pages.flatMap((page) => page.posts);
+
+  if (posts.length === 0) return emptyState;
+
   return (
-    <div className="relative flex grow flex-col">
-      {isLoading ? (
-        <PostListSkeleton />
-      ) : data && data.pages.length > 0 ? (
-        <AnimatePresence initial={false}>
-          {data.pages.map((page) =>
-            page.posts.map(({ post, author }) => (
-              <PostView key={post.id} {...{ post, author }} />
-            ))
-          )}
-        </AnimatePresence>
-      ) : (
-        <span className="my-auto self-center">No posts found</span>
-      )}
-      <AnimatePresence>
-        {!!isFetchingNextPage && !!hasNextPage && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.4 }}
-            className="flex w-full items-center justify-center"
-          >
-            <PostListSkeleton items={3} />
-          </motion.div>
-        )}
+    <div className="flex flex-col">
+      <AnimatePresence initial={false}>
+        {posts.map(({ post, author }) => (
+          <PostView key={post.id} post={post} author={author} />
+        ))}
       </AnimatePresence>
-      <div ref={ref}> </div>
+      {hasNextPage && (
+        <div ref={ref}>{isFetchingNextPage && <LoadingSpinner />}</div>
+      )}
     </div>
   );
 };
