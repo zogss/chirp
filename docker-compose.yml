@@ -1,0 +1,25 @@
+# Local services for development.
+#
+#   docker compose up -d
+#
+# - postgres: the app database (DATABASE_URL)
+services:
+  postgres:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: chirp
+      POSTGRES_PASSWORD: chirp
+      POSTGRES_DB: chirp
+    ports:
+      - "55432:5432"
+    volumes:
+      - chirp-postgres:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U chirp"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  chirp-postgres:
