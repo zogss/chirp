@@ -1,29 +1,40 @@
 name: CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [main]
+  pull_request:
 
 env:
-  DATABASE_URL: "https://fake.com"
+  # CI only type-checks, lints and checks formatting, no service is reached
+  SKIP_ENV_VALIDATION: "true"
+  DATABASE_URL: "postgresql://chirp:chirp@localhost:5432/chirp"
 
 jobs:
-  build:
+  check:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v7
 
-      - name: Yarn Install
-        run: npm install -g yarn
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
 
       - name: Install Dependencies
-        run: yarn install
+        run: yarn install --immutable
 
       - name: Typecheck
-        run: yarn typecheck
+        run: yarn check-types
 
       - name: Lint
         run: yarn lint
 
-      - name: Print Environment Variable
-        run: echo $MY_ENV_VAR
+      - name: Format
+        run: yarn prettier --check "**/*.{js,jsx,ts,tsx,json,css,md}"
