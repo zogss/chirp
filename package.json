@@ -17,12 +17,12 @@
     "db:studio": "prisma studio",
     "dev": "next dev",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
-    "lint": "next typegen && eslint .",
-    "lint:fix": "next typegen && eslint . --fix",
+    "lint": "SKIP_ENV_VALIDATION=1 next typegen && eslint .",
+    "lint:fix": "SKIP_ENV_VALIDATION=1 next typegen && eslint . --fix",
     "postinstall": "prisma generate",
     "preview": "next build && next start",
     "start": "next start",
-    "check-types": "next typegen && tsc --noEmit"
+    "check-types": "SKIP_ENV_VALIDATION=1 next typegen && tsc --noEmit"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.9.2",
@@ -47,6 +47,7 @@
     "react-hot-toast": "^2.6.0",
     "react-icons": "^5.7.0",
     "react-intersection-observer": "^11.0.1",
+    "redis": "^6.2.1",
     "server-only": "^0.0.1",
     "superjson": "^2.2.6",
     "zod": "^4.6.5"

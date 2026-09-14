@@ -12,7 +12,7 @@ import {
   addUserDataToPosts,
   toPostAuthor,
 } from "~/server/helpers/addUserDataToPosts";
-import { ratelimiter } from "~/server/services/rateLimiter";
+import { getRateLimiter } from "~/server/services/rateLimiter";
 import { postContentSchema } from "~/utils/emoji";
 
 export const postsRouter = createTRPCRouter({
@@ -79,7 +79,8 @@ export const postsRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { success, reset, pending } = await ratelimiter.limit(ctx.userId);
+      const rateLimiter = await getRateLimiter();
+      const { success, reset, pending } = await rateLimiter.limit(ctx.userId);
       // analytics are sent in the background, let them finish after the response
       after(() => pending);
 

@@ -1,6 +1,9 @@
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
 
+// Next.js sets NODE_ENV to "development" for `next dev` and to "production" for every other command
+const isProduction = process.env.NODE_ENV === "production";
+
 export const env = createEnv({
   /**
    * Specify your server-side environment variables schema here. This way you can ensure the app
@@ -9,8 +12,13 @@ export const env = createEnv({
   server: {
     DATABASE_URL: z.url(),
     CLERK_SECRET_KEY: z.string().startsWith("sk_"),
-    UPSTASH_REDIS_REST_URL: z.url(),
-    UPSTASH_REDIS_REST_TOKEN: z.string().min(1),
+    // Rate limiting uses Upstash in production...
+    UPSTASH_REDIS_REST_URL: isProduction ? z.url() : z.url().optional(),
+    UPSTASH_REDIS_REST_TOKEN: isProduction
+      ? z.string().min(1)
+      : z.string().optional(),
+    // ...and the local Redis from `docker-compose.yml` in development
+    LOCAL_REDIS_URL: z.url().default("redis://localhost:6379"),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
@@ -34,6 +42,7 @@ export const env = createEnv({
     CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
     UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
     UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
+    LOCAL_REDIS_URL: process.env.LOCAL_REDIS_URL,
     NODE_ENV: process.env.NODE_ENV,
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
       process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
