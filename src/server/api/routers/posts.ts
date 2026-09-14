@@ -1,105 +1,49 @@
+import { clerkClient } from "@clerk/nextjs/server";
 import { TRPCError } from "@trpc/server";
+import { after } from "next/server";
 import { z } from "zod";
+
 import {
   createTRPCRouter,
   privateProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
+import {
+  addUserDataToPosts,
+  toPostAuthor,
+} from "~/server/helpers/addUserDataToPosts";
 import { ratelimiter } from "~/server/services/rateLimiter";
-import emojiRegex from "emoji-regex";
-import { addUserDataToPosts } from "~/server/helpers/addUserDataToPosts";
+import { postContentSchema } from "~/utils/emoji";
 
 export const postsRouter = createTRPCRouter({
-  getAll: publicProcedure.query(async ({ ctx }) => {
-    const posts = await ctx.prisma.post.findMany({
-      take: 100,
-      orderBy: [{ createdAt: "desc" }],
-    });
-
-    return addUserDataToPosts(posts);
-  }),
-
-  infiniteScroll: publicProcedure
+  infinite: publicProcedure
     .input(
       z.object({
-        limit: z.number(),
+        limit: z.number().int().min(1).max(50).default(20),
         // cursor is a reference to the last item in the previous batch
         // it's used to fetch the next batch
         cursor: z.string().nullish(),
-        skip: z.number().optional(),
-      })
+        // when set, only posts from this author are returned (profile feed)
+        authorId: z.string().optional(),
+      }),
     )
-    .query(async ({ ctx, input }) => {
-      const { limit, skip, cursor } = input;
-      const items = await ctx.prisma.post.findMany({
+    .query(async ({ ctx, input: { limit, cursor, authorId } }) => {
+      const items = await ctx.db.post.findMany({
+        where: { authorId },
         take: limit + 1,
-        skip: skip,
         cursor: cursor ? { id: cursor } : undefined,
-        orderBy: [{ createdAt: "desc" }],
+        // `id` breaks ties between posts created at the same instant, keeping pages stable
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
       });
-      let nextCursor: typeof cursor | undefined = undefined;
-      if (items.length > limit) {
-        const nextItem = items.pop(); // return the last item from the array
-        nextCursor = nextItem?.id;
-      }
-      const posts = await addUserDataToPosts(items);
-      return {
-        posts,
-        nextCursor,
-      };
-    }),
 
-  getByUserId: publicProcedure
-    .input(
-      z.object({
-        userId: z.string(),
-      })
-    )
-    .query(
-      async ({ ctx, input }) =>
-        await ctx.prisma.post
-          .findMany({
-            where: {
-              authorId: input.userId,
-            },
-            take: 100,
-            orderBy: {
-              createdAt: "desc",
-            },
-          })
-          .then(addUserDataToPosts)
-    ),
-
-  infiniteScrollByUserId: publicProcedure
-    .input(
-      z.object({
-        userId: z.string(),
-        limit: z.number(),
-        // cursor is a reference to the last item in the previous batch
-        // it's used to fetch the next batch
-        cursor: z.string().nullish(),
-        skip: z.number().optional(),
-      })
-    )
-    .query(async ({ ctx, input }) => {
-      const { limit, skip, cursor, userId } = input;
-      const items = await ctx.prisma.post.findMany({
-        where: {
-          authorId: userId,
-        },
-        take: limit + 1,
-        skip: skip,
-        cursor: cursor ? { id: cursor } : undefined,
-        orderBy: [{ createdAt: "desc" }],
-      });
-      let nextCursor: typeof cursor | undefined = undefined;
+      let nextCursor: string | undefined = undefined;
       if (items.length > limit) {
-        const nextItem = items.pop(); // return the last item from the array
-        nextCursor = nextItem?.id;
+        // the extra item is the first one of the next batch
+        nextCursor = items.pop()?.id;
       }
-      const posts = await addUserDataToPosts(items);
+
       return {
-        posts,
+        posts: await addUserDataToPosts(items),
         nextCursor,
       };
     }),
@@ -108,53 +52,82 @@ export const postsRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string(),
-      })
+      }),
     )
     .query(async ({ ctx, input: { id } }) => {
-      const post = await ctx.prisma.post.findUnique({
+      const post = await ctx.db.post.findUnique({
         where: {
           id,
         },
       });
 
-      if (!post)
+      const [postWithAuthor] = post ? await addUserDataToPosts([post]) : [];
+
+      if (!postWithAuthor)
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Post not found",
         });
 
-      return (await addUserDataToPosts([post]))[0];
+      return postWithAuthor;
     }),
 
   create: privateProcedure
     .input(
       z.object({
-        content: z
-          .string()
-          .emoji("Only emojis are allowed!")
-          .regex(emojiRegex(), "Only emojis are allowed!")
-          .min(1)
-          .max(280),
-      })
+        content: postContentSchema,
+      }),
     )
     .mutation(async ({ ctx, input }) => {
-      const authorId = ctx.userId;
+      const { success, reset, pending } = await ratelimiter.limit(ctx.userId);
+      // analytics are sent in the background, let them finish after the response
+      after(() => pending);
 
-      const { success } = await ratelimiter.limit(authorId);
-
-      if (!success)
+      if (!success) {
+        const seconds = Math.max(1, Math.ceil((reset - Date.now()) / 1000));
         throw new TRPCError({
           code: "TOO_MANY_REQUESTS",
-          message: "You are doing that too much. Try again later.",
+          message: `You're chirping too fast! Try again in ${seconds}s.`,
+        });
+      }
+
+      const user = await (await clerkClient()).users.getUser(ctx.userId);
+      const author = toPostAuthor(user);
+
+      if (!author)
+        throw new TRPCError({
+          code: "PRECONDITION_FAILED",
+          message: "Pick a username in your account settings before chirping.",
         });
 
-      const post = await ctx.prisma.post.create({
+      const post = await ctx.db.post.create({
         data: {
-          authorId,
+          authorId: ctx.userId,
           content: input.content,
         },
       });
 
-      return post;
+      return { post, author };
+    }),
+
+  delete: privateProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input: { id } }) => {
+      // scoping by author makes deleting someone else's post a no-op
+      const { count } = await ctx.db.post.deleteMany({
+        where: { id, authorId: ctx.userId },
+      });
+
+      if (count === 0)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Post not found",
+        });
+
+      return { id };
     }),
 });

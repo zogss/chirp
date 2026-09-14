@@ -1,9 +1,15 @@
-import { Ratelimit } from "@upstash/ratelimit"; // for deno: see above
+import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 
-// Create a new ratelimiter, that allows 5 requests per 1 minute
+import { env } from "~/env";
+
+// 5 chirps per minute, per user
 export const ratelimiter = new Ratelimit({
-  redis: Redis.fromEnv(),
+  redis: new Redis({
+    url: env.UPSTASH_REDIS_REST_URL,
+    token: env.UPSTASH_REDIS_REST_TOKEN,
+  }),
   limiter: Ratelimit.slidingWindow(5, "1 m"),
   analytics: true,
+  prefix: "chirp:ratelimit",
 });

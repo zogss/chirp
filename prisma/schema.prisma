@@ -15,7 +15,9 @@ model Post {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
 
-  content  String @db.VarChar(280)
+  // The 280 characters limit is enforced by the app, with emojis counting as 2 characters (like
+  // on Twitter). A single emoji can be made of many code points, so a VARCHAR(280) doesn't fit.
+  content  String
   authorId String
 
   @@index([createdAt(sort: Desc), id(sort: Desc)])
