@@ -6,6 +6,12 @@
  * TL;DR - This is where all the tRPC server stuff is created and plugged in. The pieces you will
  * need to use are documented accordingly near the end.
  */
+import { auth } from "@clerk/nextjs/server";
+import { initTRPC, TRPCError } from "@trpc/server";
+import superjson from "superjson";
+import { z, ZodError } from "zod";
+
+import { db } from "~/server/db";
 
 /**
  * 1. CONTEXT
@@ -13,23 +19,19 @@
  * This section defines the "contexts" that are available in the backend API.
  *
  * These allow you to access things when processing a request, like the database, the session, etc.
- */
-import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
-import { getAuth } from "@clerk/nextjs/server";
-import { prisma } from "~/server/db";
-
-/**
- * This is the actual context you will use in your router. It will be used to process every request
- * that goes through your tRPC endpoint.
  *
- * @see https://trpc.io/docs/context
+ * This helper generates the "internals" for a tRPC context. The API handler and RSC clients each
+ * wrap this and provides the required context.
+ *
+ * @see https://trpc.io/docs/server/context
  */
-export const createTRPCContext = ({ req }: CreateNextContextOptions) => {
-  const { userId } = getAuth(req);
+export const createTRPCContext = async (opts: { headers: Headers }) => {
+  const { userId } = await auth();
 
   return {
-    prisma,
+    db,
     userId,
+    ...opts,
   };
 };
 
@@ -40,10 +42,6 @@ export const createTRPCContext = ({ req }: CreateNextContextOptions) => {
  * ZodErrors so that you get typesafety on the frontend if your procedure fails due to validation
  * errors on the backend.
  */
-import { initTRPC, TRPCError } from "@trpc/server";
-import superjson from "superjson";
-import { ZodError } from "zod";
-
 const t = initTRPC.context<typeof createTRPCContext>().create({
   transformer: superjson,
   errorFormatter({ shape, error }) {
@@ -52,18 +50,26 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
       data: {
         ...shape.data,
         zodError:
-          error.cause instanceof ZodError ? error.cause.flatten() : null,
+          error.cause instanceof ZodError
+            ? z.flattenError(error.cause as ZodError<Record<string, unknown>>)
+            : null,
       },
     };
   },
 });
 
 /**
+ * Create a server-side caller.
+ *
+ * @see https://trpc.io/docs/server/server-side-calls
+ */
+export const createCallerFactory = t.createCallerFactory;
+
+/**
  * 3. ROUTER & PROCEDURE (THE IMPORTANT BIT)
  *
  * These are the pieces you use to build your tRPC API. You should import these a lot in the
- * "/src/server/api/routers" directory.import { TRPCError } from '@trpc/server';
-
+ * "/src/server/api/routers" directory.
  */
 
 /**
@@ -85,15 +91,13 @@ export const publicProcedure = t.procedure;
 /**
  * Authenticated procedure
  *
- * This is the base piece you use to build new queries and mutations on your tRPC API. It guarantees
- * that a user querying is authorized, and you can access user session data.
- *
+ * Guarantees that the user making the request is signed in, and narrows `ctx.userId` to a string.
  */
-const enforceUserIsAuth = t.middleware(({ ctx, next }) => {
+const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
   if (!ctx.userId) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
-      message: "You must be logged in to perform this action",
+      message: "You must be signed in to do that",
     });
   }
 
@@ -104,4 +108,4 @@ const enforceUserIsAuth = t.middleware(({ ctx, next }) => {
   });
 });
 
-export const privateProcedure = t.procedure.use(enforceUserIsAuth);
+export const privateProcedure = t.procedure.use(enforceUserIsAuthed);

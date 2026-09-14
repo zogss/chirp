@@ -1,22 +1,25 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
-  relationMode = "prisma"
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
 }
 
-generator client {
-  provider = "prisma-client-js"
+// The connection URL lives in `prisma.config.ts`
+datasource db {
+  provider = "postgresql"
 }
 
 model Post {
-    id        String   @id @default(cuid())
-    createdAt DateTime @default(now())
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
 
-    content   String @db.VarChar(255)
-    authorId  String 
+  // The 280 characters limit is enforced by the app, with emojis counting as 2 characters (like
+  // on Twitter). A single emoji can be made of many code points, so a VARCHAR(280) doesn't fit.
+  content  String
+  authorId String
 
-    @@index([authorId])
+  @@index([createdAt(sort: Desc), id(sort: Desc)])
+  @@index([authorId, createdAt(sort: Desc)])
 }

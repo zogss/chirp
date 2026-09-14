@@ -1,84 +1,71 @@
-import { useUser, useClerk } from "@clerk/nextjs";
-import { Menu, Transition } from "@headlessui/react";
-import Image from "next/image";
-import React, { Fragment } from "react";
-import { BsThreeDots } from "react-icons/bs";
+"use client";
+
+import { useAuth, useClerk, useUser } from "@clerk/nextjs";
+import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
+import { RiMoreFill } from "react-icons/ri";
+
+import { Avatar } from "./avatar";
+
+const menuItemClassName =
+  "w-full px-4 py-3 text-left font-bold transition-colors data-focus:bg-white/3";
 
 const AccountButtonSkeleton = () => (
-  <div className="flex items-center gap-3">
-    <div className="h-10 w-10 rounded-full bg-gray-600"></div>
-    <div className="flex flex-col gap-1">
-      <div className="h-4 w-20 rounded bg-gray-600"></div>
-      <div className="h-3 w-16 rounded bg-gray-600"></div>
+  <div aria-hidden className="my-3 flex items-center gap-3 p-3">
+    <div className="size-10 shrink-0 animate-pulse rounded-full bg-surface" />
+    <div className="hidden flex-col gap-1.5 xl:flex">
+      <span className="h-3.5 w-24 animate-pulse rounded-full bg-surface" />
+      <span className="h-3 w-16 animate-pulse rounded-full bg-surface" />
     </div>
-    <div className="ml-14 h-1 w-3 rounded bg-gray-600"></div>
   </div>
 );
 
 export const AccountMenu = () => {
   //* hooks
-  const { user, isSignedIn, isLoaded } = useUser();
-  const { signOut } = useClerk();
+  const { isSignedIn } = useAuth();
+  const { user } = useUser();
+  const { signOut, openUserProfile } = useClerk();
 
   //* render
   if (!isSignedIn) return null;
 
+  if (!user) return <AccountButtonSkeleton />;
+
+  const username = user.username ?? "";
+
   return (
-    <Menu
-      as="div"
-      className="relative hidden w-full shrink-0 text-left sm:flex"
-    >
-      <div className="flex shrink-0 justify-end">
-        <Menu.Button className="flex w-fit items-center justify-start gap-3 rounded-full p-2 text-sm font-medium text-white transition-all hover:bg-slate-200 hover:bg-opacity-10 md:p-3 md:pr-4 lg:w-full">
-          {isLoaded ? (
-            <>
-              <Image
-                src={user.profileImageUrl}
-                alt={`${user.username || ""}'s profile image`}
-                width={40}
-                height={40}
-                className="shrink-0 rounded-full"
-              />
-              <div className="hidden flex-col items-start justify-start md:flex">
-                <h6 className="text-base font-semibold text-white">
-                  {user.firstName}
-                </h6>
-                <span className="text-gray-600">{`@${
-                  user.username || ""
-                }`}</span>
-              </div>
-              <BsThreeDots className="hidden md:ml-2 lg:ml-8 lg:block xl:ml-14" />
-            </>
-          ) : (
-            <AccountButtonSkeleton />
-          )}
-        </Menu.Button>
-      </div>
-      <Transition
-        as={Fragment}
-        enter="transition ease-out duration-100"
-        enterFrom="transform opacity-0 scale-95"
-        enterTo="transform opacity-100 scale-100"
-        leave="transition ease-in duration-75"
-        leaveFrom="transform opacity-100 scale-100"
-        leaveTo="transform opacity-0 scale-95"
+    <Menu>
+      <MenuButton className="my-3 flex w-full items-center gap-3 rounded-full p-3 text-left transition-colors outline-none hover:bg-foreground/10 data-focus:bg-foreground/10 data-open:bg-foreground/10">
+        <Avatar src={user.imageUrl} username={username} size={40} />
+        <div className="hidden min-w-0 flex-1 leading-5 xl:block">
+          <p className="truncate font-bold">{user.fullName ?? username}</p>
+          <p className="truncate text-muted">@{username}</p>
+        </div>
+        <RiMoreFill size={18} className="hidden xl:block" />
+      </MenuButton>
+      <MenuItems
+        anchor={{ to: "top start", gap: 8 }}
+        transition
+        className="z-40 w-75 rounded-2xl bg-black py-3 shadow-popover transition duration-100 ease-out outline-none data-closed:scale-95 data-closed:opacity-0"
       >
-        <Menu.Items
-          as="div"
-          className="absolute bottom-16 left-0 z-10 mb-2 w-56 origin-bottom-right rounded-xl bg-black py-4 shadow-outline-white"
-        >
-          <Menu.Item>
-            <button
-              type="button"
-              title="Sign out"
-              onClick={() => void signOut()}
-              className="flex w-full items-center px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-slate-200 hover:bg-opacity-10"
-            >
-              Log out @{user.username}
-            </button>
-          </Menu.Item>
-        </Menu.Items>
-      </Transition>
+        <MenuItem>
+          <button
+            type="button"
+            onClick={() => openUserProfile()}
+            className={menuItemClassName}
+          >
+            Manage account
+          </button>
+        </MenuItem>
+        <MenuItem>
+          <button
+            type="button"
+            onClick={() => void signOut({ redirectUrl: "/" })}
+            className={menuItemClassName}
+          >
+            Log out @{username}
+          </button>
+        </MenuItem>
+      </MenuItems>
     </Menu>
   );
 };

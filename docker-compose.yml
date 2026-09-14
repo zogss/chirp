@@ -1,0 +1,73 @@
+# Local services for development.
+#
+#   docker compose up -d --build
+#
+# - postgres: the app database (DATABASE_URL)
+# - db-setup: applies the migrations and seeds the database from your Clerk users, then exits. It
+#   runs again on every `up`, which is a no-op once the database is ready.
+# - redis: rate limiting during development (LOCAL_REDIS_URL). Production uses Upstash instead,
+#   see `src/server/services/rateLimiter.ts`.
+services:
+  postgres:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: chirp
+      POSTGRES_PASSWORD: chirp
+      POSTGRES_DB: chirp
+    ports:
+      - "55432:5432"
+    volumes:
+      - chirp-postgres:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U chirp"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  db-setup:
+    build:
+      context: .
+      dockerfile: docker/db-setup.Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # the seed reads CLERK_SECRET_KEY from your env files
+    env_file:
+      - path: .env
+        required: false
+      - path: .env.local
+        required: false
+    environment:
+      DATABASE_URL: postgresql://chirp:chirp@postgres:5432/chirp
+      PRISMA_HIDE_UPDATE_MESSAGE: "1"
+    # mounted rather than copied, so new migrations don't need an image rebuild
+    volumes:
+      - ./prisma:/app/prisma:ro
+      - ./prisma.config.ts:/app/prisma.config.ts:ro
+    command:
+      - sh
+      - -c
+      - |
+        set -e
+        yarn prisma generate
+        yarn prisma migrate deploy
+        if [ -n "$$CLERK_SECRET_KEY" ]; then
+          yarn prisma db seed
+        else
+          echo "CLERK_SECRET_KEY isn't set in .env, skipping the seed."
+        fi
+
+  redis:
+    image: redis:8-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  chirp-postgres:

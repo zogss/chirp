@@ -1,21 +1,30 @@
-import type { User } from "@clerk/nextjs/server";
-import React from "react";
 import Image from "next/image";
 
+import type { RouterOutputs } from "~/trpc/react";
+import { ProfileManagementButton } from "../profileManagementButton";
+
+type Profile = RouterOutputs["profile"]["getUserByUsername"];
+
 export const ProfileImageBlock = ({
-  profileImageUrl,
+  id,
   username,
-}: Partial<User>) => (
+  imageUrl,
+}: Pick<Profile, "id" | "username" | "imageUrl">) => (
   <div>
-    <div className="relative h-40 bg-slate-600">
-      <Image
-        src={profileImageUrl || ""}
-        alt={`(@${username || "Not found"}) - profile image`}
-        width={128}
-        height={128}
-        className="absolute bottom-0 left-0 -mb-16 ml-4 h-32 w-32 rounded-full border-4 border-black bg-slate-700 text-center"
-      />
+    <div className="aspect-3/1 w-full bg-banner" />
+    <div className="flex items-start justify-between px-4 pt-3">
+      <div className="mt-[-15%] w-1/4 max-w-33.5 min-w-12 rounded-full border-4 border-black bg-black">
+        <Image
+          src={imageUrl}
+          alt={`@${username}'s profile picture`}
+          width={134}
+          height={134}
+          // it's usually the largest image above the fold
+          loading="eager"
+          className="aspect-square h-auto w-full rounded-full object-cover"
+        />
+      </div>
+      <ProfileManagementButton userId={id} />
     </div>
-    <div className="h-16" />
   </div>
 );
