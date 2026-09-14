@@ -3,14 +3,18 @@
 # dependencies
 /node_modules
 /.pnp
-.pnp.js
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
 # testing
 /coverage
 
-# database
-/prisma/db.sqlite
-/prisma/db.sqlite-journal
+# prisma client (generated on install)
+/src/generated
 
 # next.js
 /.next/
@@ -23,6 +27,7 @@ next-env.d.ts
 # misc
 .DS_Store
 *.pem
+.idea
 
 # debug
 npm-debug.log*
